@@ -1,2 +1,2 @@
 # autonomous-wheelchair
-Autonomous Wheelshair with AI oice control
+Autonomous Wheelchair with AI voice control
