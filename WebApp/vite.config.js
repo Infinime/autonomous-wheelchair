@@ -6,7 +6,7 @@ const manifestForPlugin = {
 	registerType: "prompt",
 	includeAssets: ["favicon.ico", "apple-touch-icon.png", "masked-icon.svg"],
 	manifest: {
-		name: "Wheely",
+		name: "Auto Wheel Chair Monitor",
 		short_name: "Wheely",
 		description: "An app that serves as the interface layer for interaction with the Autonomous Wheelchair",
 		icons: [
@@ -27,7 +27,7 @@ const manifestForPlugin = {
 				purpose: "apple touch icon",
 			},
 			{
-				src: "/maskable_icon.png",
+				src: "/maskables.png",
 				sizes: "225x225",
 				type: "image/png",
 				purpose: "any maskable",
