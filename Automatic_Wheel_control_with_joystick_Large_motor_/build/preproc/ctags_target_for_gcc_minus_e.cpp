@@ -1,10 +1,11 @@
+# 1 "C:\\Users\\Ebun\\source\\repos\\autonomous-wheelchair\\Automatic_Wheel_control_with_joystick_Large_motor_\\Automatic_Wheel_control_with_joystick_Large_motor_.ino"
 /* code for automatic wheel chair using irf3205 motor driver with 24V power supply
+
    using joystick control for mechatronics system design 2, department of mechatronics engr
+
    Federal University of Technology, Minna 
+
  */
-
-
-
 //initiate right wheel control pin
 int pwm1=3; //PWM pin
 int dir1=2;
@@ -14,8 +15,8 @@ int pwm2=5; //PWM pin
 int dir2=4;
 
 //initiate joystic control pin
-#define joystickVert A0
-#define joystickHort A1
+
+
 
 //initialte position
 int joystickPosVert=437;
@@ -41,19 +42,19 @@ int LEDyellow2=12;
 
 void setup() {
   // put your setup code here, to run once:
-pinMode(pwm1, OUTPUT);
-pinMode(dir1, OUTPUT);
-pinMode(dir2, OUTPUT);
-pinMode(pwm2, OUTPUT);
-pinMode(LEDgreen, OUTPUT);
-pinMode(LEDred, OUTPUT);
-pinMode(LEDyellow1, OUTPUT);
-pinMode(LEDyellow2, OUTPUT);
-pinMode(triggerPin, OUTPUT);
-pinMode(echoPin, INPUT);
-pinMode(buzzerPin, OUTPUT);
-pinMode(joystickVert, INPUT);
-pinMode(joystickHort, INPUT);
+pinMode(pwm1, 0x1);
+pinMode(dir1, 0x1);
+pinMode(dir2, 0x1);
+pinMode(pwm2, 0x1);
+pinMode(LEDgreen, 0x1);
+pinMode(LEDred, 0x1);
+pinMode(LEDyellow1, 0x1);
+pinMode(LEDyellow2, 0x1);
+pinMode(triggerPin, 0x1);
+pinMode(echoPin, 0x0);
+pinMode(buzzerPin, 0x1);
+pinMode(A0, 0x0);
+pinMode(A1, 0x0);
 
 //initially set to forward mode with no motion
 digitalWrite(pwm1, 0);
@@ -66,10 +67,10 @@ Serial.begin(9600);
 
 void loop() {
   // put your main code here, to run repeatedly:
-joystickPosVert = analogRead(joystickVert);
-joystickPosHor = analogRead(joystickHort);
+joystickPosVert = analogRead(A0);
+joystickPosHor = analogRead(A1);
 
-if(joystickPosVert < 237){    //giving it some clearance of 52(about 10%)
+if(joystickPosVert < 237){ //giving it some clearance of 52(about 10%)
   // This is backward motion
   Serial.println("vert reverse: ");
   Serial.println(joystickPosVert);
@@ -77,35 +78,35 @@ if(joystickPosVert < 237){    //giving it some clearance of 52(about 10%)
   //set right wheel to move backward
   digitalWrite(dir1, 0);
   //set left wheel to move backward
-  digitalWrite(dir2, 0);  
+  digitalWrite(dir2, 0);
   //turn on red LED
-  digitalWrite(LEDred, HIGH);
-  digitalWrite(LEDgreen, LOW);
-  digitalWrite(LEDyellow1, LOW);
-  digitalWrite(LEDyellow2, LOW);
-  
+  digitalWrite(LEDred, 0x1);
+  digitalWrite(LEDgreen, 0x0);
+  digitalWrite(LEDyellow1, 0x0);
+  digitalWrite(LEDyellow2, 0x0);
+
   joystickPosVert = joystickPosVert - 237;
   joystickPosVert = joystickPosVert * -1;
-  
+
   motorSpeed1 = map(joystickPosVert, 0, 237, 0, 200);
-  motorSpeed2 = map(joystickPosVert, 0, 237, 0, 200); 
+  motorSpeed2 = map(joystickPosVert, 0, 237, 0, 200);
   Serial.println("Yay!!! i am reversing");
   //delay(50);
   //code for obstacle detection
 
-  digitalWrite(triggerPin, LOW);
+  digitalWrite(triggerPin, 0x0);
   delayMicroseconds(2);
-  digitalWrite(triggerPin, HIGH);
+  digitalWrite(triggerPin, 0x1);
   delayMicroseconds(10);
-  digitalWrite(triggerPin, LOW);
+  digitalWrite(triggerPin, 0x0);
 
   //Measure the response from the HC-SR04 Echo pin
-  duration = pulseIn(echoPin, HIGH);
+  duration = pulseIn(echoPin, 0x1);
 
   //determine distance for duration
   //use 0.0343cm/s as speed of sound in air
- 
-  distance = (duration/2) * 0.0343; 
+
+  distance = (duration/2) * 0.0343;
 
   //send results to serial monitor
   Serial.print("Distance =: ");
@@ -115,7 +116,7 @@ if(joystickPosVert < 237){    //giving it some clearance of 52(about 10%)
     Serial.print(distance);
     Serial.println(" cm");
   }
-  if(distance  <= 40){
+  if(distance <= 40){
     Serial.println("Beware, obstacle ahead!!!");
     tone(buzzerPin, 300);
     delay(400);
@@ -131,32 +132,32 @@ else if(joystickPosVert > 537){
   digitalWrite(dir2, 1);
 
   //turn on green LED
-  digitalWrite(LEDred, LOW);
-  digitalWrite(LEDgreen, HIGH);
-  digitalWrite(LEDyellow1, LOW);
-  digitalWrite(LEDyellow2, LOW);
+  digitalWrite(LEDred, 0x0);
+  digitalWrite(LEDgreen, 0x1);
+  digitalWrite(LEDyellow1, 0x0);
+  digitalWrite(LEDyellow2, 0x0);
 
   motorSpeed1 = map(joystickPosVert, 537, 1023, 0, 100);
-  motorSpeed2 = map(joystickPosVert, 537, 1023, 0, 100); 
-  Serial.println("Yay!!! i am moving forward"); 
-  Serial.println(joystickPosVert);  
+  motorSpeed2 = map(joystickPosVert, 537, 1023, 0, 100);
+  Serial.println("Yay!!! i am moving forward");
+  Serial.println(joystickPosVert);
   //delay(50);
   }
- else{ 
+ else{
 //  digitalWrite(dir1,X);
 //  digitalWrite(dir2,X);
   motorSpeed1--; // @remind @test
   motorSpeed2--; // @remind @test
-  motorSpeed1 = max(motorSpeed1, 0);
-  motorSpeed2 = max(motorSpeed2, 0);
-   digitalWrite(LEDred, LOW);
-   digitalWrite(LEDgreen, LOW);
-   digitalWrite(LEDyellow1, LOW);
-   digitalWrite(LEDyellow2, LOW);
+  motorSpeed1 = ((motorSpeed1)>(0)?(motorSpeed1):(0));
+  motorSpeed2 = ((motorSpeed2)>(0)?(motorSpeed2):(0));
+   digitalWrite(LEDred, 0x0);
+   digitalWrite(LEDgreen, 0x0);
+   digitalWrite(LEDyellow1, 0x0);
+   digitalWrite(LEDyellow2, 0x0);
    //delay(50);
   // the wheels wont move between 460-563
   Serial.print(" I stop moving");
-  } 
+  }
 
  //setting up the left and right movement
 
@@ -169,20 +170,20 @@ if(joystickPosHor < 237){
 
   joystickPosHor = map(joystickPosHor, 0, 237, 0, 100);
 
-   motorSpeed1 =  motorSpeed1 - joystickPosHor;
-   motorSpeed2 =  motorSpeed2 + joystickPosHor;
+   motorSpeed1 = motorSpeed1 - joystickPosHor;
+   motorSpeed2 = motorSpeed2 + joystickPosHor;
 
    //turn on yellow1 (left yellow) LED
-   digitalWrite(LEDred, LOW);
-   digitalWrite(LEDgreen, LOW);
-   digitalWrite(LEDyellow1, HIGH);
-   digitalWrite(LEDyellow2, LOW);
-   
+   digitalWrite(LEDred, 0x0);
+   digitalWrite(LEDgreen, 0x0);
+   digitalWrite(LEDyellow1, 0x1);
+   digitalWrite(LEDyellow2, 0x0);
+
 
    //Don't exceed range of 0-255 for motor speeds 
 
-   motorSpeed1 = max(motorSpeed1, 0);
-   motorSpeed2 = min(motorSpeed2, 100);
+   motorSpeed1 = ((motorSpeed1)>(0)?(motorSpeed1):(0));
+   motorSpeed2 = ((motorSpeed2)<(100)?(motorSpeed2):(100));
 
    Serial.print("Yay!!! i'm moving to the left");
    //delay(50);
@@ -192,27 +193,27 @@ else if(joystickPosHor > 660){
    Serial.println(joystickPosHor);
    joystickPosHor = map(joystickPosHor, 660, 1023, 0, 95);
 
-   motorSpeed1 =  motorSpeed1 + joystickPosHor;
-   motorSpeed2 =  motorSpeed2 - joystickPosHor;
+   motorSpeed1 = motorSpeed1 + joystickPosHor;
+   motorSpeed2 = motorSpeed2 - joystickPosHor;
 
    //Don't exceed range of 0-255 for motor speeds 
-   
-   motorSpeed1 = min(motorSpeed1, 100);
 
-    motorSpeed2 = max(motorSpeed2, 0);
+   motorSpeed1 = ((motorSpeed1)<(100)?(motorSpeed1):(100));
+
+    motorSpeed2 = ((motorSpeed2)>(0)?(motorSpeed2):(0));
    //turn on yellow2 (left yellow) LED
-   digitalWrite(LEDred, LOW);
-   digitalWrite(LEDgreen, LOW);
-   digitalWrite(LEDyellow1, LOW);
-   digitalWrite(LEDyellow2, HIGH);
+   digitalWrite(LEDred, 0x0);
+   digitalWrite(LEDgreen, 0x0);
+   digitalWrite(LEDyellow1, 0x0);
+   digitalWrite(LEDyellow2, 0x1);
    //delay(50);
 }
 
  if(joystickPosHor >= 237 && joystickPosHor <= 660 && joystickPosVert >= 237 && joystickPosVert <= 537){
    motorSpeed1--;// @remind
    motorSpeed2--;// @remind
-   motorSpeed1 = max(motorSpeed1, 0);
-   motorSpeed2 = max(motorSpeed2, 0);
+   motorSpeed1 = ((motorSpeed1)>(0)?(motorSpeed1):(0));
+   motorSpeed2 = ((motorSpeed2)>(0)?(motorSpeed2):(0));
 }
 
     //Adjust to prevent buzzling at very low speed

@@ -5,6 +5,11 @@
   text-align: center;
 }
 
+body{
+  --tw-bg-opacity: 1;
+    background-color: rgb(100 116 139 / var(--tw-bg-opacity));
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

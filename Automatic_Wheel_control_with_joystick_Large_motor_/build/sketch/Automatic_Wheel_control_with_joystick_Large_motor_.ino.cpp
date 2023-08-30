@@ -1,3 +1,5 @@
+#include <Arduino.h>
+#line 1 "C:\\Users\\Ebun\\source\\repos\\autonomous-wheelchair\\Automatic_Wheel_control_with_joystick_Large_motor_\\Automatic_Wheel_control_with_joystick_Large_motor_.ino"
 /* code for automatic wheel chair using irf3205 motor driver with 24V power supply
    using joystick control for mechatronics system design 2, department of mechatronics engr
    Federal University of Technology, Minna 
@@ -39,6 +41,11 @@ int LEDred=7;
 int LEDyellow1=11;
 int LEDyellow2=12;
 
+#line 42 "C:\\Users\\Ebun\\source\\repos\\autonomous-wheelchair\\Automatic_Wheel_control_with_joystick_Large_motor_\\Automatic_Wheel_control_with_joystick_Large_motor_.ino"
+void setup();
+#line 67 "C:\\Users\\Ebun\\source\\repos\\autonomous-wheelchair\\Automatic_Wheel_control_with_joystick_Large_motor_\\Automatic_Wheel_control_with_joystick_Large_motor_.ino"
+void loop();
+#line 42 "C:\\Users\\Ebun\\source\\repos\\autonomous-wheelchair\\Automatic_Wheel_control_with_joystick_Large_motor_\\Automatic_Wheel_control_with_joystick_Large_motor_.ino"
 void setup() {
   // put your setup code here, to run once:
 pinMode(pwm1, OUTPUT);
