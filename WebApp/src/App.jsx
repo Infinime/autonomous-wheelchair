@@ -1,6 +1,5 @@
 /* eslint-disable react/jsx-no-target-blank */
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
+
 import { useState, useEffect } from "react";
 import pauseButton from "/svgs/Pause.svg";
 import recordButton from "/svgs/Record.svg";
@@ -9,9 +8,10 @@ import resumeButton from "/svgs/Play.svg";
 import battery from "/svgs/battery.svg";
 import left from "/svgs/left-arrow.svg";
 import right from "/svgs/right-arrow.svg";
-// import AudioRecorder from './AudioRecorder';
 import "./App.css";
 import { AudioRecorder, useAudioRecorder } from "react-audio-voice-recorder";
+import axios from 'axios';
+import * as fs from 'node:fs';
 
 // import Record from './components/Record'
 
@@ -29,6 +29,52 @@ function App() {
 
   const [isNavigating, setIsNavigating] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [locations, setLocations] = useState([]); // [ {name: "Engineering", location: "37.865101,  -119.538330 "}]
+
+  //read file from locations.txt at start
+  // useEffect(() => {
+  //   const data = fs.readFileSync('locations.txt', 'utf8')
+  //   console.log(data)
+  //   // add to locations
+  //   const lines = data.split('\n')
+  //   const newLocations = []
+  //   for (let i = 0; i < lines.length; i++) {
+  //     const line = lines[i]
+  //     const [name, location] = line.split(' ')
+  //     newLocations.push({ name, location })
+  //   }
+  //   setLocations(newLocations)
+  // }, [])
+  // const addPlace = (name, location) => {
+  //   //add to locations
+  //   setLocations([...locations, { name, location }]);
+  //   //write to file
+  //   fs.appendFileSync('locations.txt', `${name} ${location}\n`)
+  // };
+
+  //check to see if esp32 is connected
+  const isConnectedToEsp32 = async() => {
+    //ping esp32
+    //if response is received setIsConnected(true)
+    
+      alert("Checking connection")
+
+    fetch('http://192.168.1.97/')
+    .then((response) => {
+      alert(response.status)
+      if (response.status === 200) {
+        console.log('success');
+        setIsConnected(true);
+      } else {
+        console.log('error');
+      }
+    })
+  .catch((error) => {
+    alert(error)
+       console.log('network error: ' + error);
+   })
+  };
+
 
   useEffect(() => {
     if (!recordingBlob) return;
@@ -41,7 +87,7 @@ function App() {
     // check for whether it's in list of saved places
 
     //if not saved prompt to save
-    let shouldSave = prompt("Do you want to save the current location in list");
+    // let shouldSave = prompt("Do you want to save the current location in list");
   }, [recordingBlob]);
 
   const addAudioElement = (blob) => {
@@ -91,7 +137,10 @@ function App() {
               Navigating to:{" "}
             </div>
           </div>
-
+          {!isConnected?
+          <button className="border border-black text-white bg-emerald-600 mt-4 mb-4" onClick={isConnectedToEsp32}>
+            Connect to ESP32
+          </button>:null}
           <div className=" mt-10 flex flex-col items-center">
             <div className="flex flex-row mb-2 transition">
               <button

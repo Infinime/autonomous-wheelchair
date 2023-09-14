@@ -9,7 +9,7 @@
 - Move <forward, backward>: Move at MEDIUM speed in specified direction
 - Turn <left, right>: Turn the wheelchair 90 degrees in said direction
 - STOP: ends all wheelchair movement execution
-- Save Command: Notes what the joystick is on, and keys it to a 2 word command provided by the user
+- ~~Save Command: Notes what the joystick is on, and keys it to a 2 word command provided by the user~~
 - Slow down: Shift from FAST mode to MEDIUM, or from MEDIUM to SLOW, or SLOW to STOP.
 - Speed up: Shift from MEDIUM to FAST, or from SLOW to MEDIUM, or STOP to SLOW.
 ### Tasks to be completed

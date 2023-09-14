@@ -1,0 +1,6 @@
+{
+    "board": "arduino:avr:uno",
+    "programmer": "avrisp",
+    "sketch": "Automatic_Wheel_control_with_joystick_Large_motor_.ino",
+    "output": "build"
+}
