@@ -1,0 +1,11 @@
+{
+  "additionalFiles": "..\\..\\..,..\\..\\..",
+  "builtInToolsFolders": "",
+  "compiler.optimization_flags": "-Os",
+  "customBuildProperties": "",
+  "fqbn": "esp32:esp32:esp32doit-devkit-v1:FlashFreq=80,UploadSpeed=115200,DebugLevel=none,EraseFlash=all",
+  "hardwareFolders": "C:\\Users\\Ebun\\AppData\\Local\\Arduino15\\packages",
+  "otherLibrariesFolders": "C:\\Users\\Ebun\\Documents\\Arduino\\libraries",
+  "runtime.ide.version": "10607",
+  "sketchLocation": "C:\\Users\\Ebun\\source\\repos\\autonomous-wheelchair\\ESP_Interface"
+}

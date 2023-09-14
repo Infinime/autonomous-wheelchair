@@ -4,6 +4,11 @@
         "eamodio.gitlens",
         "dbaeumer.vscode-eslint", 
         "esbenp.prettier-vscode",
-        "ms-vscode.cpptools"
+        "ms-vscode.cpptools",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.vscode-serial-monitor"
+    ],
+    "unwantedRecommendations": [
+        "ms-vscode.cpptools-extension-pack"
     ]
 }

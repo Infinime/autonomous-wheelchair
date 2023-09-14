@@ -1,0 +1,5 @@
+{
+    "arduino.useArduinoCli": true,
+    "bookmarks.useWorkaroundForFormatters": true,
+    "explorer.fileNesting.enabled": true
+}

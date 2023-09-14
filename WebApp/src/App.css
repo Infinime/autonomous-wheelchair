@@ -1,9 +1,20 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+.record:hover svg circle {
+  fill-opacity: 0.78;
 }
+
+/*CSS Trick to help with layout*/
+/* * {
+  outline: 1px solid red;
+} */
+
+body{
+  --tw-bg-opacity: 1;/* 
+    background-color: rgb(100 116 139 / var(--tw-bg-opacity));*/
+    background: linear-gradient(180deg,#8399a2 0%,rgba(238,242,243,0)100%);
+    background-size: cover;
+    background-blend-mode: normal;
+    background-repeat: no-repeat;
+} 
 
 .logo {
   height: 6em;
