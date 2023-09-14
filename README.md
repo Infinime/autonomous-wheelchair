@@ -2,6 +2,11 @@
 
 Autonomous Wheelchair with AI voice control developed by Group I of the 2018/2019 Set
 
+## Tools
+
+- Arduino Ide
+- ESP Library from [index](https://espressif.github.io/arduino-esp32/package_esp32_index.json)
+
 ## References
 
 - Making a Web Server using ESP32 .[Guide](https://randomnerdtutorials.com/esp32-web-server-arduino-ide/)
