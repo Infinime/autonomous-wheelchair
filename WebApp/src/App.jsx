@@ -10,8 +10,9 @@ import left from "/svgs/left-arrow.svg";
 import right from "/svgs/right-arrow.svg";
 import "./App.css";
 import { AudioRecorder, useAudioRecorder } from "react-audio-voice-recorder";
-import axios from 'axios';
-import * as fs from 'node:fs';
+import { saveAs } from "file-saver";
+import axios from "axios";
+import * as fs from "node:fs";
 
 // import Record from './components/Record'
 
@@ -53,42 +54,56 @@ function App() {
   // };
 
   //check to see if esp32 is connected
-  const isConnectedToEsp32 = async() => {
+  const isConnectedToEsp32 = async () => {
     //ping esp32
     //if response is received setIsConnected(true)
-    
-      alert("Checking connection")
-
-    fetch('http://192.168.1.97/')
-    .then((response) => {
-      alert(response.status)
-      if (response.status === 200) {
-        console.log('success');
-        setIsConnected(true);
-      } else {
-        console.log('error');
-      }
-    })
-  .catch((error) => {
-    alert(error)
-       console.log('network error: ' + error);
-   })
+    fetch("http://192.168.1.97/")
+      .then((response) => {
+        if (response.status === 200) {
+          console.log("success");
+          setIsConnected(true);
+        } else {
+          console.log("error");
+        }
+      })
+      .catch((error) => {
+        alert(
+          "An error has occured when trying to connect to the ESP, here's some more info.",
+          error
+        );
+        console.log("network error: " + error);
+      });
   };
-
 
   useEffect(() => {
     if (!recordingBlob) return;
     // recordingBlob will be present at this point after 'stopRecording' has been called
-    alert("Recording has occured");
 
-    //send the blob to whisper to decipher
+    // saveAs(recordingBlob, "recording.webm");
+    const audioStream = recordingBlob.stream;
+    let formData = new FormData();
 
-    //after receiving "confirma"
-    // check for whether it's in list of saved places
+    formData.append("file", this.file);
 
-    //if not saved prompt to save
-    // let shouldSave = prompt("Do you want to save the current location in list");
+    // axios
+    //   .post("<WHISPER_API>", formData, {
+    //     headers: {
+    //       "Content-Type": "multipart/form-data",
+    //     },
+    //   })
+    //   .then(function () {
+    //     console.log("SUCCESS!!");
+    //   })
+    //   .catch(function () {
+    //     console.log("FAILURE!!");
+    //   });
   }, [recordingBlob]);
+
+  // useEffect(() =>{
+  //   if(recordingTime >= 30){
+  //     stopRecording();
+  //   }
+  // },[recordingTime, stopRecording]);
 
   const addAudioElement = (blob) => {
     const url = URL.createObjectURL(blob);
@@ -128,19 +143,30 @@ function App() {
             <div className="  text-black lg:text-xl font-bold font-['Inter'] leading-none">
               72%
             </div>
-            <div className=" w-5 h-5 lg:w-6 lg:h-6 lg:ml-12 bg-teal-800 rounded-full" />
+            <div
+              className={
+                " w-5 h-5 lg:w-6 lg:h-6 lg:ml-12 rounded-full" +
+                (isConnected ? " bg-emerald-800 " : " bg-red-600")
+              }
+            />
             <div className="  text-black lg:text-2xl font-bold font-['Inter'] leading-none">
-              Connected
+              {isConnected ? " Connected" : "Disconnected"}
             </div>
-            <div className="w-6 h-6 lg:ml-10 bg-red-600 rounded-full" />
+            <span className="material-symbols-outlined lg:ml-10">
+              conversion_path
+            </span>
             <div className=" text-black lg:text-2xl font-bold font-['Inter'] leading-none">
-              Navigating to:{" "}
+              Status:{" "}
             </div>
           </div>
-          {!isConnected?
-          <button className="border border-black text-white bg-emerald-600 mt-4 mb-4" onClick={isConnectedToEsp32}>
-            Connect to ESP32
-          </button>:null}
+          {!isConnected ? (
+            <button
+              className="border border-black  bg-emerald-600  text-white mt-4 mb-4"
+              onClick={isConnectedToEsp32}
+            >
+              Connect to ESP32
+            </button>
+          ) : null}
           <div className=" mt-10 flex flex-col items-center">
             <div className="flex flex-row mb-2 transition">
               <button
@@ -168,25 +194,40 @@ function App() {
             </p>
           </div>
 
-          <div className="lg:w-6/12 bg-zinc-300 h-2/6 rounded-t-3xl lg:rounded-t-[43px] items-center border border-black flex flex-col mt-auto gap-1 pt-0">
-            <div className=" text-black text-[32px] font-medium font-['Roboto'] leading-none mt-4">
-              Saved Locations
+          <div className="lg:w-3/12 bg-zinc-300 h-fit rounded-t-3xl lg:rounded-t-[43px] items-center border border-black flex flex-col mt-auto gap-1 pt-0">
+            <div className=" text-black text-[32px] font-medium font-['Roboto'] leading-none mt-4 mx-2">
+              Commands List
             </div>
-            <div className="flex flex-row flex-wrap justify-between items-center align-middle p-0 w-full pl-3 pr-3  h-4/6">
-              <img src={left} className="h-10" />
-              <img
-                className="w-10/12 h-full border border-dashed border-slate-800"
-                src="https://via.placeholder.com/624x204"
-              />
-              <img src={right} className="h-10" />
+            <div className="flex flex-row flex-wrap justify-center items-center align-middle p-0 w-full pl-3 pr-3  h-4/6">
+              {/* <img src={left} className="h-10" /> */}
+              <ol className="text-xl text-left flex flex-col w-full">
+                <li className=" border-b border-black bg-[#b1afaf]">
+                  Move Forward
+                </li>
+                <li className=" border-b border-black bg-[#b1afaf]">
+                  Move Backward
+                </li>
+                <li className=" border-b border-black bg-[#b1afaf]">
+                  Turn Left
+                </li>
+                <li className=" border-b border-black bg-[#b1afaf]">
+                  Turn Right
+                </li>
+                <li className=" border-b border-black bg-[#b1afaf]">Stop</li>
+                <li className=" border-b border-black bg-[#b1afaf]">
+                  Slow Down
+                </li>
+                <li className=" border-b border-black bg-[#b1afaf]">
+                  Speed Up
+                </li>
+              </ol>
+              {/* <img src={right} className="h-10" /> */}
             </div>
-            <div className=" text-center text-black text-xl font-semibold font-['Roboto'] leading-none">
+            <div className=" text-center text-black text-xl mt-1 font-semibold font-['Roboto'] leading-none">
               Engineering
             </div>
             <div className="w-6/12 h-2   justify-center mt-auto mb-1 items-start gap-5 inline-flex">
               <div className="w-3/12 h-1 bg-slate-600 rounded" />
-              <div className="w-3/12 h-1 bg-gray-100 rounded" />
-              <div className="w-3/12 h-1 bg-gray-100 rounded" />
               <div className="w-3/12 h-1 bg-gray-100 rounded" />
             </div>
           </div>

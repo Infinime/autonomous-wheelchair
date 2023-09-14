@@ -62,6 +62,7 @@ void loop(){
             client.println("HTTP/1.1 200 OK");
             client.println("Content-type:text/html");
             client.println("Connection: close");
+            client.println("Access-Control-Allow-Origin:*");
             client.println();
             
             // turns the GPIOs on and off
