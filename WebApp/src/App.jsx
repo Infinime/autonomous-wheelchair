@@ -32,7 +32,8 @@ function App() {
     mediaRecorder,
   } = useAudioRecorder();
 
-  const [isNavigating, setIsNavigating] = useState(false);
+  const [status, setStatus] = useState("At Rest");
+  const[espIp, setEspIp] = useState("192.168.1.98");
   const [isConnected, setIsConnected] = useState(false);
   const [command, setCommand] = useState("stop");
 
@@ -112,27 +113,91 @@ function App() {
       return;
     }
     if(command.toLowerCase().includes("forward") ){
-      fetch("http://192.168.1.97/m/f")
+      fetch("http://192.168.1.97/m/f").then((response) => {
+        if (response.status === 200) {
+          console.log("success");
+          setStatus("Moving Forward");
+        } else {
+          console.log("error");
+        }
+      }).catch((error) => {
+        console.log("network error: " + error);
+      });
+
     }
     else if(command.toLowerCase().includes("backward") ){
-      fetch("http://192.168.1.97/m/b")
+      fetch("http://192.168.1.97/m/b").then((response) => {
+        if (response.status === 200) {
+          console.log("success");
+          setStatus("Moving Backward");
+        } else {
+          console.log("error");
+        }
+      }).catch((error) => {
+        console.log("network error: " + error);
+      });
     }
     else if(command.toLowerCase().includes("left") ){
-      fetch("http://192.168.1.97/t/l")
+      fetch("http://192.168.1.97/t/l").then((response) => {
+        if (response.status === 200) {
+          console.log("success");
+          setStatus("Turning Left");
+        } else {
+          console.log("error");
+        }
+      }).catch((error) => {
+        console.log("network error: " + error);
+      });
     }
     else if(command.toLowerCase().includes("right") ){
-      fetch("http://192.168.1.97/t/r")
+      fetch("http://192.168.1.97/t/r").then((response) => {
+        if (response.status === 200) {
+          console.log("success");
+          setStatus("Turning Right");
+        } else {
+          console.log("error");
+        }
+      }).catch((error) => {
+        console.log("network error: " + error);
+      });
     }
     else if(command.toLowerCase().includes("stop") ){
-      fetch("http://192.168.1.97/stop")
+      fetch("http://192.168.1.97/stop").then((response) => {
+        if (response.status === 200) {
+          console.log("success");
+          setStatus("Stopped");
+        } else {
+          console.log("error");
+        }
+      }).catch((error) => {
+        console.log("network error: " + error);
+      });
     }
     else if(command.toLowerCase().includes("speed")&& command.toLowerCase().includes("up") ){
-      fetch("http://192.168.1.97/s/u")
+      fetch("http://192.168.1.97/s/u").then((response) => {
+        if (response.status === 200) {
+          console.log("success");
+          setStatus("Speeding up");
+        } else {
+          console.log("error");
+        }
+      }).catch((error) => {
+        console.log("network error: " + error);
+      });
     }
     else if(command.toLowerCase().includes("slow")&& command.toLowerCase().includes("down") ){
-      fetch("http://192.168.1.97/s/l")
+      fetch("http://192.168.1.97/s/l").then((response) => {
+        if (response.status === 200) {
+          console.log("success");
+          setStatus("Slowing Down");
+        } else {
+          console.log("error");
+        }
+      }).catch((error) => {
+        console.log("network error: " + error);
+      });
     }else{
-      fetch("http://192.168.1.97/invalid");
+      setStatus("Invalid Command");
     }
   },[command,isConnected]);
 
@@ -162,34 +227,38 @@ function App() {
     downloadFileExtension="webm"/> */}
       <div className="container h-screen w-screen m-auto overflow-hidden p-0">
         <div className=" flex flex-col h-full   pt-3 justify-end gap-10  shrink-0 items-center">
-          <div className="w-11/12 lg:w-6/12 h-fit flex flex-row gap-1  pt-3 align-middle items-center p-2 bg-zinc-300 rounded-lg lg:rounded-[18px] border border-black">
+          <div className="w-11/12 lg:w-8/12 h-fit flex flex-row gap-1  pt-3 align-middle items-center p-2 bg-zinc-300 rounded-lg lg:rounded-[18px] border border-black">
             <img src={battery} className="lg:ml-4 w-3" />
             <div className="  text-black lg:text-xl font-bold font-['Inter'] leading-none">
               72%
             </div>
             <div
               className={
-                " w-5 h-5 lg:w-6 lg:h-6 lg:ml-12 rounded-full" +
+                " w-5 h-5 lg:w-6 lg:h-6 lg:ml-5 rounded-full" +
                 (isConnected ? " bg-emerald-800 " : " bg-red-600")
               }
             />
             <div className="  text-black lg:text-2xl font-bold font-['Inter'] leading-none">
               {isConnected ? " Connected" : "Disconnected"}
             </div>
-            <span className="material-symbols-outlined lg:ml-10">
+            <span className="material-symbols-outlined ml-1 lg:ml-8">
               conversion_path
             </span>
             <div className=" text-black lg:text-2xl font-bold font-['Inter'] leading-none">
-              Status:{" "}
-            </div>
+              Status:
+            </div><h4 className=" text-sm lg:text-lg font-medium">{status}</h4>
           </div>
           {!isConnected ? (
+            <div className="flex flex-row gap-2 justify-center items-center">
+              <input type="text" className="w-4/12 h-fit border-black border rounded-md"  value={espIp} onChange={(e)=>{setEspIp(e.target.value)}} placeholder="IP from ESP"/>
             <button
-              className="border border-black  bg-emerald-600  text-white mt-4 mb-4"
+              className="border border-black  bg-emerald-600  text-white mt-4 mb-4  rounded-md"
               onClick={isConnectedToEsp32}
             >
               Connect to ESP32
             </button>
+            </div>
+            
           ) : null}
           <div className=" mt-10 flex flex-col items-center">
             <div className="flex flex-row mb-2 transition">
