@@ -2,8 +2,8 @@
 #include <WiFi.h>
 
 // Replace with your network credentials
-const char* ssid = "GoldBars Internet ";
-const char* password = "Land2023";
+const char* ssid = "WheelFi";
+const char* password = "Overabled";
 
 // Set web server port number to 80
 WiFiServer server(80);
@@ -18,6 +18,40 @@ unsigned long previousTime = 0;
 // Define timeout time in milliseconds (example: 2000ms = 2s)
 const long timeoutTime = 2000;
 
+void handle_OnConnect() {
+  // Serial.println(server.client().localIP());
+  Serial.println("HomePage");
+  // server.send(200, "text/html", SendHTML()); 
+}
+void moveForward(){
+  Serial.println("Moving Forward");
+  // server.send(200, "text/html", SendHTML()); 
+}
+void moveBackward(){
+  Serial.println("Moving Backward");
+  // server.send(200, "text/html", SendHTML()); 
+}
+void turnLeft(){
+  Serial.println("Turning Left");
+  // server.send(200, "text/html", SendHTML()); 
+}
+void turnRight(){
+  Serial.println("Turning Right");
+  // server.send(200, "text/html", SendHTML()); 
+}
+void stopWheel(){
+  Serial.println("Stopping");
+  // server.send(200, "text/html", SendHTML()); 
+}
+void speedUp(){
+  Serial.println("Speeding Up");
+  // server.send(200, "text/html", SendHTML()); 
+}
+void slowDown(){
+  Serial.println("Slowing Down");
+  // server.send(200, "text/html", SendHTML()); 
+}
+
 void setup() {
   Serial.begin(115200);
 
@@ -30,7 +64,7 @@ void setup() {
     Serial.print(".");
   }
 
-  WiFi.config(IPAddress(192,168,1,97), IPAddress(192,168,1,1), IPAddress(255,255,255,0), IPAddress(192,168,1,1), IPAddress(192,168,1,1));
+  WiFi.config(IPAddress(192,168,1,7), IPAddress(192,168,1,1), IPAddress(255,255,255,0), IPAddress(192,168,1,1), IPAddress(192,168,1,1));
   // Print local IP address and start web server
   Serial.println("");
   Serial.println("WiFi connected.");
@@ -66,17 +100,29 @@ void loop(){
             client.println();
             
             // turns the GPIOs on and off
-            if (header.indexOf("GET /26/on") >= 0) {
-              Serial.println("GPIO 26 on");
-            } else if (header.indexOf("GET /26/off") >= 0) {
-              Serial.println("GPIO 26 off");
+            Serial.println(header);
+            if (header.indexOf("GET /m/f") >= 0) {
+              moveForward();
+            } 
+            if (header.indexOf("GET /m/b") >= 0) {
+              moveBackward();
+            } 
+            if (header.indexOf("GET /t/r") >= 0) {
+              turnRight();
+            } 
+            if (header.indexOf("GET /t/l") >= 0) {
+              turnLeft();
+            } 
+            if (header.indexOf("GET /stop") >= 0) {
+              stopWheel();
+            } 
+            if (header.indexOf("GET /s/u") >= 0) {
+              speedUp();
+            } 
+            if (header.indexOf("GET /s/d") >= 0) {
+              slowDown();
+            } 
 
-            } else if (header.indexOf("GET /27/on") >= 0) {
-              Serial.println("GPIO 27 on");
-
-            } else if (header.indexOf("GET /27/off") >= 0) {
-              Serial.println("GPIO 27 off");
-            }
             
             // Display the HTML web page
             client.println("<!DOCTYPE html><html>");

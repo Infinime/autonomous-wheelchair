@@ -249,7 +249,7 @@
                 "ARDUINO_VARIANT=\"doitESP32devkitV1\"",
                 "ARDUINO_PARTITION_default",
                 "ESP32",
-                "CORE_DEBUG_LEVEL=0",
+                "CORE_DEBUG_LEVEL=3",
                 "ARDUINO_USB_CDC_ON_BOOT=0",
                 "__DBL_MIN_EXP__=(-1021)",
                 "__FLT32X_MAX_EXP__=1024",

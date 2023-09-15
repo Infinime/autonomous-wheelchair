@@ -10,13 +10,17 @@ import left from "/svgs/left-arrow.svg";
 import right from "/svgs/right-arrow.svg";
 import "./App.css";
 import { AudioRecorder, useAudioRecorder } from "react-audio-voice-recorder";
-import { saveAs } from "file-saver";
 import axios from "axios";
-import * as fs from "node:fs";
+// import * as fs from "node:fs";
+import OpenAI from 'openai';
+const openai = new OpenAI({
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY, // defaults to process.env["OPENAI_API_KEY"]
+  dangerouslyAllowBrowser: true,
+});
 
-// import Record from './components/Record'
-
+const VITE_OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 function App() {
+
   const {
     startRecording,
     stopRecording,
@@ -30,7 +34,7 @@ function App() {
 
   const [isNavigating, setIsNavigating] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
-  const [locations, setLocations] = useState([]); // [ {name: "Engineering", location: "37.865101,  -119.538330 "}]
+  const [command, setCommand] = useState("stop");
 
   //read file from locations.txt at start
   // useEffect(() => {
@@ -64,54 +68,74 @@ function App() {
           setIsConnected(true);
         } else {
           console.log("error");
+          setIsConnected(false);
         }
       })
       .catch((error) => {
         alert(
           "An error has occured when trying to connect to the ESP, here's some more info.",
           error
-        );
+          );
+          setIsConnected(false);
         console.log("network error: " + error);
       });
   };
 
   useEffect(() => {
     if (!recordingBlob) return;
-    // recordingBlob will be present at this point after 'stopRecording' has been called
 
-    // saveAs(recordingBlob, "recording.webm");
-    const audioStream = recordingBlob.stream;
     let formData = new FormData();
+    const file = new File([recordingBlob], "input.wav", { type: "audio/wav" });
+    formData.append("file",file);
+    formData.append("model","whisper-1")
+    formData.append("language","en")
 
-    formData.append("file", this.file);
 
-    // axios
-    //   .post("<WHISPER_API>", formData, {
-    //     headers: {
-    //       "Content-Type": "multipart/form-data",
-    //     },
-    //   })
-    //   .then(function () {
-    //     console.log("SUCCESS!!");
-    //   })
-    //   .catch(function () {
-    //     console.log("FAILURE!!");
-    //   });
+      const requestOptions = {
+        method: 'POST',
+        headers: { "Authorization": "Bearer " +VITE_OPENAI_API_KEY },
+        body: formData
+    };
+    try{
+    fetch('https://api.openai.com/v1/audio/transcriptions', requestOptions)
+        .then(response => response.json())
+        .then(data => {console.log(data);setCommand(data.text); });
+      }catch(e){
+          console.log(e)
+        }
+      isConnectedToEsp32();
   }, [recordingBlob]);
 
-  // useEffect(() =>{
-  //   if(recordingTime >= 30){
-  //     stopRecording();
-  //   }
-  // },[recordingTime, stopRecording]);
 
-  const addAudioElement = (blob) => {
-    const url = URL.createObjectURL(blob);
-    const audio = document.createElement("audio");
-    audio.src = url;
-    audio.controls = true;
-    document.body.appendChild(audio);
-  };
+  useEffect(() =>{
+    if(isConnected == false){
+      return;
+    }
+    if(command.toLowerCase().includes("forward") ){
+      fetch("http://192.168.1.97/m/f")
+    }
+    else if(command.toLowerCase().includes("backward") ){
+      fetch("http://192.168.1.97/m/b")
+    }
+    else if(command.toLowerCase().includes("left") ){
+      fetch("http://192.168.1.97/t/l")
+    }
+    else if(command.toLowerCase().includes("right") ){
+      fetch("http://192.168.1.97/t/r")
+    }
+    else if(command.toLowerCase().includes("stop") ){
+      fetch("http://192.168.1.97/stop")
+    }
+    else if(command.toLowerCase().includes("speed")&& command.toLowerCase().includes("up") ){
+      fetch("http://192.168.1.97/s/u")
+    }
+    else if(command.toLowerCase().includes("slow")&& command.toLowerCase().includes("down") ){
+      fetch("http://192.168.1.97/s/l")
+    }else{
+      fetch("http://192.168.1.97/invalid");
+    }
+  },[command,isConnected]);
+
 
   const parseTime = (num) => {
     return (
@@ -223,9 +247,9 @@ function App() {
               </ol>
               {/* <img src={right} className="h-10" /> */}
             </div>
-            <div className=" text-center text-black text-xl mt-1 font-semibold font-['Roboto'] leading-none">
+            {/*<div className=" text-center text-black text-xl mt-1 font-semibold font-['Roboto'] leading-none">
               Engineering
-            </div>
+            </div>*/}
             <div className="w-6/12 h-2   justify-center mt-auto mb-1 items-start gap-5 inline-flex">
               <div className="w-3/12 h-1 bg-slate-600 rounded" />
               <div className="w-3/12 h-1 bg-gray-100 rounded" />
