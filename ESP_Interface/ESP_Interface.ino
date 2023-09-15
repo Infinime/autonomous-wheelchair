@@ -2,8 +2,8 @@
 #include <WiFi.h>
 
 // Replace with your network credentials
-const char* ssid = "WheelFi";
-const char* password = "Overabled";
+const char* ssid = "Quincy";
+const char* password = "etesians";
 
 // Set web server port number to 80
 WiFiServer server(80);
@@ -63,8 +63,6 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
-
-  WiFi.config(IPAddress(192,168,1,7), IPAddress(192,168,1,1), IPAddress(255,255,255,0), IPAddress(192,168,1,1), IPAddress(192,168,1,1));
   // Print local IP address and start web server
   Serial.println("");
   Serial.println("WiFi connected.");
@@ -76,7 +74,8 @@ void setup() {
 void loop(){
   WiFiClient client = server.available();   // Listen for incoming clients
 
-  if (client) {                             // If a new client connects,
+  if (client) {           
+    // Serial.println("Client");                  // If a new client connects,
     currentTime = millis();
     previousTime = currentTime;
     Serial.println("New Client.");          // print a message out in the serial port
@@ -176,4 +175,5 @@ void loop(){
     Serial.println("Client disconnected.");
     Serial.println("");
   }
+  // Serial.println("NO Client");
 }
