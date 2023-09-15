@@ -4,8 +4,8 @@
 #include <WiFi.h>
 
 // Replace with your network credentials
-const char* ssid = "GoldBars Internet ";
-const char* password = "Bing2020";
+const char* ssid = "WheelFi";
+const char* password = "Overabled";
 
 // Set web server port number to 80
 WiFiServer server(80);
@@ -37,7 +37,7 @@ void setup() {
     Serial.print(".");
   }
 
-  WiFi.config(IPAddress(192,168,1,99), IPAddress(192,168,1,1), IPAddress(255,255,255,0), IPAddress(192,168,1,1), IPAddress(192,168,1,1));
+  WiFi.config(IPAddress(192,168,1,7), IPAddress(192,168,1,1), IPAddress(255,255,255,0), IPAddress(192,168,1,1), IPAddress(192,168,1,1));
   // Print local IP address and start web server
   Serial.println("");
   Serial.println("WiFi connected.");
@@ -69,6 +69,7 @@ void loop(){
             client.println("HTTP/1.1 200 OK");
             client.println("Content-type:text/html");
             client.println("Connection: close");
+            client.println("Access-Control-Allow-Origin:*");
             client.println();
             
             // turns the GPIOs on and off
@@ -106,7 +107,7 @@ void loop(){
             // } else {
             //   client.println("<p><a href=\"/26/off\"><button class=\"button button2\">OFF</button></a></p>");
             // } 
-               
+               client.println("<p>Hello World!!</p>");
             // // Display current state, and ON/OFF buttons for GPIO 27  
             // client.println("<p>GPIO 27 - State " + output27State + "</p>");
             // // If the output27State is off, it displays the ON button       
