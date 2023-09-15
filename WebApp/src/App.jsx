@@ -113,7 +113,7 @@ function App() {
       return;
     }
     if(command.toLowerCase().includes("forward") ){
-      fetch("http://192.168.1.97/m/f").then((response) => {
+      fetch("http://"+espIp+"/m/f").then((response) => {
         if (response.status === 200) {
           console.log("success");
           setStatus("Moving Forward");
@@ -126,7 +126,7 @@ function App() {
 
     }
     else if(command.toLowerCase().includes("backward") ){
-      fetch("http://192.168.1.97/m/b").then((response) => {
+      fetch("http://"+espIp+"/m/b").then((response) => {
         if (response.status === 200) {
           console.log("success");
           setStatus("Moving Backward");
@@ -138,7 +138,7 @@ function App() {
       });
     }
     else if(command.toLowerCase().includes("left") ){
-      fetch("http://192.168.1.97/t/l").then((response) => {
+      fetch("http://"+espIp+"/t/l").then((response) => {
         if (response.status === 200) {
           console.log("success");
           setStatus("Turning Left");
@@ -150,7 +150,7 @@ function App() {
       });
     }
     else if(command.toLowerCase().includes("right") ){
-      fetch("http://192.168.1.97/t/r").then((response) => {
+      fetch("http://"+espIp+"/t/r").then((response) => {
         if (response.status === 200) {
           console.log("success");
           setStatus("Turning Right");
@@ -162,7 +162,7 @@ function App() {
       });
     }
     else if(command.toLowerCase().includes("stop") ){
-      fetch("http://192.168.1.97/stop").then((response) => {
+      fetch("http://"+espIp+"/stop").then((response) => {
         if (response.status === 200) {
           console.log("success");
           setStatus("Stopped");
@@ -174,7 +174,7 @@ function App() {
       });
     }
     else if(command.toLowerCase().includes("speed")&& command.toLowerCase().includes("up") ){
-      fetch("http://192.168.1.97/s/u").then((response) => {
+      fetch("http://"+espIp+"/s/u").then((response) => {
         if (response.status === 200) {
           console.log("success");
           setStatus("Speeding up");
@@ -186,7 +186,7 @@ function App() {
       });
     }
     else if(command.toLowerCase().includes("slow")&& command.toLowerCase().includes("down") ){
-      fetch("http://192.168.1.97/s/l").then((response) => {
+      fetch("http://"+espIp+"/s/l").then((response) => {
         if (response.status === 200) {
           console.log("success");
           setStatus("Slowing Down");
