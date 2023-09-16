@@ -10,12 +10,17 @@ import left from "/svgs/left-arrow.svg";
 import right from "/svgs/right-arrow.svg";
 import "./App.css";
 import { AudioRecorder, useAudioRecorder } from "react-audio-voice-recorder";
-import axios from 'axios';
-import * as fs from 'node:fs';
+import axios from "axios";
+// import * as fs from "node:fs";
+import OpenAI from 'openai';
+const openai = new OpenAI({
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY, // defaults to process.env["OPENAI_API_KEY"]
+  dangerouslyAllowBrowser: true,
+});
 
-// import Record from './components/Record'
-
+const VITE_OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 function App() {
+
   const {
     startRecording,
     stopRecording,
@@ -27,9 +32,10 @@ function App() {
     mediaRecorder,
   } = useAudioRecorder();
 
-  const [isNavigating, setIsNavigating] = useState(false);
+  const [status, setStatus] = useState("At Rest");
+  const[espIp, setEspIp] = useState("192.168.1.98");
   const [isConnected, setIsConnected] = useState(false);
-  const [locations, setLocations] = useState([]); // [ {name: "Engineering", location: "37.865101,  -119.538330 "}]
+  const [command, setCommand] = useState("stop");
 
   //read file from locations.txt at start
   // useEffect(() => {
@@ -53,50 +59,148 @@ function App() {
   // };
 
   //check to see if esp32 is connected
-  const isConnectedToEsp32 = async() => {
+  const isConnectedToEsp32 = async () => {
     //ping esp32
     //if response is received setIsConnected(true)
-    
-      alert("Checking connection")
-
-    fetch('http://192.168.1.97/')
-    .then((response) => {
-      alert(response.status)
-      if (response.status === 200) {
-        console.log('success');
-        setIsConnected(true);
-      } else {
-        console.log('error');
-      }
-    })
-  .catch((error) => {
-    alert(error)
-       console.log('network error: ' + error);
-   })
+    fetch("http://192.168.1.97/")
+      .then((response) => {
+        if (response.status === 200) {
+          console.log("success");
+          setIsConnected(true);
+        } else {
+          console.log("error");
+          setIsConnected(false);
+        }
+      })
+      .catch((error) => {
+        alert(
+          "An error has occured when trying to connect to the ESP, here's some more info.",
+          error
+          );
+          setIsConnected(false);
+        console.log("network error: " + error);
+      });
   };
-
 
   useEffect(() => {
     if (!recordingBlob) return;
-    // recordingBlob will be present at this point after 'stopRecording' has been called
-    alert("Recording has occured");
 
-    //send the blob to whisper to decipher
+    let formData = new FormData();
+    const file = new File([recordingBlob], "input.wav", { type: "audio/wav" });
+    formData.append("file",file);
+    formData.append("model","whisper-1")
+    formData.append("language","en")
 
-    //after receiving "confirma"
-    // check for whether it's in list of saved places
 
-    //if not saved prompt to save
-    // let shouldSave = prompt("Do you want to save the current location in list");
+      const requestOptions = {
+        method: 'POST',
+        headers: { "Authorization": "Bearer " +VITE_OPENAI_API_KEY },
+        body: formData
+    };
+    try{
+    fetch('https://api.openai.com/v1/audio/transcriptions', requestOptions)
+        .then(response => response.json())
+        .then(data => {console.log(data);setCommand(data.text); });
+      }catch(e){
+          console.log(e)
+        }
+      isConnectedToEsp32();
   }, [recordingBlob]);
 
-  const addAudioElement = (blob) => {
-    const url = URL.createObjectURL(blob);
-    const audio = document.createElement("audio");
-    audio.src = url;
-    audio.controls = true;
-    document.body.appendChild(audio);
-  };
+
+  useEffect(() =>{
+    if(isConnected == false){
+      return;
+    }
+    if(command.toLowerCase().includes("forward") ){
+      fetch("http://"+espIp+"/m/f").then((response) => {
+        if (response.status === 200) {
+          console.log("success");
+          setStatus("Moving Forward");
+        } else {
+          console.log("error");
+        }
+      }).catch((error) => {
+        console.log("network error: " + error);
+      });
+
+    }
+    else if(command.toLowerCase().includes("backward") ){
+      fetch("http://"+espIp+"/m/b").then((response) => {
+        if (response.status === 200) {
+          console.log("success");
+          setStatus("Moving Backward");
+        } else {
+          console.log("error");
+        }
+      }).catch((error) => {
+        console.log("network error: " + error);
+      });
+    }
+    else if(command.toLowerCase().includes("left") ){
+      fetch("http://"+espIp+"/t/l").then((response) => {
+        if (response.status === 200) {
+          console.log("success");
+          setStatus("Turning Left");
+        } else {
+          console.log("error");
+        }
+      }).catch((error) => {
+        console.log("network error: " + error);
+      });
+    }
+    else if(command.toLowerCase().includes("right") ){
+      fetch("http://"+espIp+"/t/r").then((response) => {
+        if (response.status === 200) {
+          console.log("success");
+          setStatus("Turning Right");
+        } else {
+          console.log("error");
+        }
+      }).catch((error) => {
+        console.log("network error: " + error);
+      });
+    }
+    else if(command.toLowerCase().includes("stop") ){
+      fetch("http://"+espIp+"/stop").then((response) => {
+        if (response.status === 200) {
+          console.log("success");
+          setStatus("Stopped");
+        } else {
+          console.log("error");
+        }
+      }).catch((error) => {
+        console.log("network error: " + error);
+      });
+    }
+    else if(command.toLowerCase().includes("speed")&& command.toLowerCase().includes("up") ){
+      fetch("http://"+espIp+"/s/u").then((response) => {
+        if (response.status === 200) {
+          console.log("success");
+          setStatus("Speeding up");
+        } else {
+          console.log("error");
+        }
+      }).catch((error) => {
+        console.log("network error: " + error);
+      });
+    }
+    else if(command.toLowerCase().includes("slow")&& command.toLowerCase().includes("down") ){
+      fetch("http://"+espIp+"/s/l").then((response) => {
+        if (response.status === 200) {
+          console.log("success");
+          setStatus("Slowing Down");
+        } else {
+          console.log("error");
+        }
+      }).catch((error) => {
+        console.log("network error: " + error);
+      });
+    }else{
+      setStatus("Invalid Command");
+    }
+  },[command,isConnected]);
+
 
   const parseTime = (num) => {
     return (
@@ -123,24 +227,39 @@ function App() {
     downloadFileExtension="webm"/> */}
       <div className="container h-screen w-screen m-auto overflow-hidden p-0">
         <div className=" flex flex-col h-full   pt-3 justify-end gap-10  shrink-0 items-center">
-          <div className="w-11/12 lg:w-6/12 h-fit flex flex-row gap-1  pt-3 align-middle items-center p-2 bg-zinc-300 rounded-lg lg:rounded-[18px] border border-black">
+          <div className="w-11/12 lg:w-8/12 h-fit flex flex-row gap-1  pt-3 align-middle items-center p-2 bg-zinc-300 rounded-lg lg:rounded-[18px] border border-black">
             <img src={battery} className="lg:ml-4 w-3" />
             <div className="  text-black lg:text-xl font-bold font-['Inter'] leading-none">
               72%
             </div>
-            <div className=" w-5 h-5 lg:w-6 lg:h-6 lg:ml-12 bg-teal-800 rounded-full" />
+            <div
+              className={
+                " w-5 h-5 lg:w-6 lg:h-6 lg:ml-5 rounded-full" +
+                (isConnected ? " bg-emerald-800 " : " bg-red-600")
+              }
+            />
             <div className="  text-black lg:text-2xl font-bold font-['Inter'] leading-none">
-              Connected
+              {isConnected ? " Connected" : "Disconnected"}
             </div>
-            <div className="w-6 h-6 lg:ml-10 bg-red-600 rounded-full" />
+            <span className="material-symbols-outlined ml-1 lg:ml-8">
+              conversion_path
+            </span>
             <div className=" text-black lg:text-2xl font-bold font-['Inter'] leading-none">
-              Navigating to:{" "}
-            </div>
+              Status:
+            </div><h4 className=" text-sm lg:text-lg font-medium">{status}</h4>
           </div>
-          {!isConnected?
-          <button className="border border-black text-white bg-emerald-600 mt-4 mb-4" onClick={isConnectedToEsp32}>
-            Connect to ESP32
-          </button>:null}
+          {!isConnected ? (
+            <div className="flex flex-row gap-2 justify-center items-center">
+              <input type="text" className="w-4/12 h-fit border-black border rounded-md"  value={espIp} onChange={(e)=>{setEspIp(e.target.value)}} placeholder="IP from ESP"/>
+            <button
+              className="border border-black  bg-emerald-600  text-white mt-4 mb-4  rounded-md"
+              onClick={isConnectedToEsp32}
+            >
+              Connect to ESP32
+            </button>
+            </div>
+            
+          ) : null}
           <div className=" mt-10 flex flex-col items-center">
             <div className="flex flex-row mb-2 transition">
               <button
@@ -168,25 +287,40 @@ function App() {
             </p>
           </div>
 
-          <div className="lg:w-6/12 bg-zinc-300 h-2/6 rounded-t-3xl lg:rounded-t-[43px] items-center border border-black flex flex-col mt-auto gap-1 pt-0">
-            <div className=" text-black text-[32px] font-medium font-['Roboto'] leading-none mt-4">
-              Saved Locations
+          <div className="lg:w-3/12 bg-zinc-300 h-fit rounded-t-3xl lg:rounded-t-[43px] items-center border border-black flex flex-col mt-auto gap-1 pt-0">
+            <div className=" text-black text-[32px] font-medium font-['Roboto'] leading-none mt-4 mx-2">
+              Commands List
             </div>
-            <div className="flex flex-row flex-wrap justify-between items-center align-middle p-0 w-full pl-3 pr-3  h-4/6">
-              <img src={left} className="h-10" />
-              <img
-                className="w-10/12 h-full border border-dashed border-slate-800"
-                src="https://via.placeholder.com/624x204"
-              />
-              <img src={right} className="h-10" />
+            <div className="flex flex-row flex-wrap justify-center items-center align-middle p-0 w-full pl-3 pr-3  h-4/6">
+              {/* <img src={left} className="h-10" /> */}
+              <ol className="text-xl text-left flex flex-col w-full">
+                <li className=" border-b border-black bg-[#b1afaf]">
+                  Move Forward
+                </li>
+                <li className=" border-b border-black bg-[#b1afaf]">
+                  Move Backward
+                </li>
+                <li className=" border-b border-black bg-[#b1afaf]">
+                  Turn Left
+                </li>
+                <li className=" border-b border-black bg-[#b1afaf]">
+                  Turn Right
+                </li>
+                <li className=" border-b border-black bg-[#b1afaf]">Stop</li>
+                <li className=" border-b border-black bg-[#b1afaf]">
+                  Slow Down
+                </li>
+                <li className=" border-b border-black bg-[#b1afaf]">
+                  Speed Up
+                </li>
+              </ol>
+              {/* <img src={right} className="h-10" /> */}
             </div>
-            <div className=" text-center text-black text-xl font-semibold font-['Roboto'] leading-none">
+            {/*<div className=" text-center text-black text-xl mt-1 font-semibold font-['Roboto'] leading-none">
               Engineering
-            </div>
+            </div>*/}
             <div className="w-6/12 h-2   justify-center mt-auto mb-1 items-start gap-5 inline-flex">
               <div className="w-3/12 h-1 bg-slate-600 rounded" />
-              <div className="w-3/12 h-1 bg-gray-100 rounded" />
-              <div className="w-3/12 h-1 bg-gray-100 rounded" />
               <div className="w-3/12 h-1 bg-gray-100 rounded" />
             </div>
           </div>
