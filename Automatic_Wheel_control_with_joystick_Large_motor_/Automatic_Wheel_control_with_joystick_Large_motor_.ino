@@ -24,7 +24,7 @@ int dir2 = 4;
 // current screen turanci
 char* currentScreen = "";
 
-// initialte position
+// initiate position
 int joyY = 512;
 int joyX = 512;
 
