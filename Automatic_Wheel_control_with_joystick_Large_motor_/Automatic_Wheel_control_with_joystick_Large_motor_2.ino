@@ -21,6 +21,9 @@ int dir2 = 4;
 // initiate battery reading pin
 #define battPin A2
 
+// current screen turanci
+char* currentScreen = "";
+
 // initialte position
 int joyY = 512;
 int joyX = 512;
@@ -39,8 +42,6 @@ bool voiceControlAllowed = 0;
 int triggerPin = 8;
 int echoPin = 9;
 float duration, distance;
-
-int speedSetting = 1;
 
 // initiate buzzer;
 int buzzerPin = 10;
@@ -73,9 +74,10 @@ void setup()
 // ---------------- Helper functions to control wheelchair ---------------------
 void updateScreen(const char *message = "Ready")
 {
-  lcd.clear();
+  if (message != currentScreen){
+lcd.clear();
   int voltReading = analogRead(battPin);
-  int volts = (voltReading / 1023) * 100;
+  int volts = map(voltReading, 676, 1023, 0, 100);
   lcd.setCursor(0, 0);
   lcd.print("Battery:");
   if (volts == 100)
@@ -99,6 +101,7 @@ void updateScreen(const char *message = "Ready")
   }
   lcd.setCursor(0, 1);
   lcd.print(message);
+  currentScreen = message}
 }
 
 void stopMotion()
@@ -122,6 +125,7 @@ void loop()
     if (not voiceControlAllowed) {stopMotion();}
     // voice shit can happen now
     voiceControlAllowed = 1;
+    // TODO: Interface with ESP to complete voice shit
   }
 
   else
