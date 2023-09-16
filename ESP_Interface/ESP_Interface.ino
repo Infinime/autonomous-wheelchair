@@ -3,8 +3,8 @@
 #include <WebServer.h>
 
 // Replace with your network credentials
-const char* ssid = "WheelFi";
-const char* password = "Overable";
+const char* ssid = "Quincy";
+const char* password = "etesians";
 
 // Set web server port number to 80
 WebServer server(80);
@@ -83,6 +83,7 @@ void setup() {
   }
 
   // WiFi.config(IPAddress(192,168,1,10), IPAddress(192,168,1,1), IPAddress(255,255,255,0), IPAddress(192,168,1,1), IPAddress(192,168,1,1));
+
   // Print local IP address and start web server
   Serial.println("");
   Serial.println("WiFi connected.");
