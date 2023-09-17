@@ -33,7 +33,9 @@ function App() {
   } = useAudioRecorder();
 
   const [status, setStatus] = useState("At Rest");
+
   const[espIp, setEspIp] = useState("");
+
   const [isConnected, setIsConnected] = useState(false);
   const [command, setCommand] = useState("stop");
 
@@ -196,8 +198,10 @@ function App() {
       }).catch((error) => {
         console.log("network error: " + error);
       });
+
     }
     else{
+
       setStatus("Invalid Command");
     }
   },[command,isConnected]);
@@ -251,7 +255,9 @@ function App() {
           </div>
           {!isConnected ? (
             <div className="flex flex-row gap-2 justify-center items-center">
+
               <input type="text" className="w-4/12 h-fit border-black border rounded-md"  value={espIp} onChange={(e)=>{console.log(e.target.value);setEspIp(e.target.value);} } placeholder="IP from ESP" id="inputBtn"/>
+
             <button
               className="border border-black  bg-emerald-600  text-white mt-4 mb-4  rounded-md"
               onClick={isConnectedToEsp32}
@@ -259,7 +265,6 @@ function App() {
               Connect to ESP32
             </button>
             </div>
-
           ) : null}
           <div className=" mt-10 flex flex-col items-center">
             <div className="flex flex-row mb-2 transition">
