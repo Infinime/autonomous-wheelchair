@@ -34,7 +34,7 @@ function App() {
 
   const [status, setStatus] = useState("At Rest");
 
-  const[espIp, setEspIp] = useState("");
+  const [espIp, setEspIp] = useState("");
 
   const [isConnected, setIsConnected] = useState(false);
   const [command, setCommand] = useState("stop");
@@ -64,7 +64,9 @@ function App() {
   const isConnectedToEsp32 = async () => {
     //ping esp32
     //if response is received setIsConnected(true)
-    fetch("http://"+espIp+"/")
+    fetch("http://" + espIp + "/", {
+      mode: 'no-cors'
+    })
       .then((response) => {
         if (response.status === 200) {
           console.log("success");
@@ -78,8 +80,8 @@ function App() {
         alert(
           "An error has occured when trying to connect to the ESP, here's some more info.",
           error
-          );
-          setIsConnected(false);
+        );
+        setIsConnected(false);
         console.log("network error: " + error);
       });
   };
@@ -89,33 +91,35 @@ function App() {
 
     let formData = new FormData();
     const file = new File([recordingBlob], "input.wav", { type: "audio/wav" });
-    formData.append("file",file);
-    formData.append("model","whisper-1")
-    formData.append("language","en")
+    formData.append("file", file);
+    formData.append("model", "whisper-1")
+    formData.append("language", "en")
 
 
-      const requestOptions = {
-        method: 'POST',
-        headers: { "Authorization": "Bearer " +VITE_OPENAI_API_KEY },
-        body: formData
+    const requestOptions = {
+      method: 'POST',
+      headers: { "Authorization": "Bearer " + VITE_OPENAI_API_KEY },
+      body: formData
     };
-    try{
-    fetch('https://api.openai.com/v1/audio/transcriptions', requestOptions)
+    try {
+      fetch('https://api.openai.com/v1/audio/transcriptions', requestOptions)
         .then(response => response.json())
-        .then(data => {console.log(data);setCommand(data.text); });
-      }catch(e){
-          console.log(e)
-        }
-      isConnectedToEsp32();
+        .then(data => { console.log(data); setCommand(data.text); });
+    } catch (e) {
+      console.log(e)
+    }
+    isConnectedToEsp32();
   }, [recordingBlob]);
 
 
-  useEffect(() =>{
-    if(isConnected == false){
+  useEffect(() => {
+    if (isConnected == false) {
       return;
     }
-    if(command.toLowerCase().includes("forward") ){
-      fetch("http://"+espIp+"/m/f").then((response) => {
+    if (command.toLowerCase().includes("forward")) {
+      fetch("http://" + espIp + "/m/f", {
+        mode: 'no-cors'
+      }).then((response) => {
         if (response.status === 200) {
           console.log("success");
           setStatus("Moving Forward");
@@ -127,8 +131,10 @@ function App() {
       });
 
     }
-    else if(command.toLowerCase().includes("backward") ){
-      fetch("http://"+espIp+"/m/b").then((response) => {
+    else if (command.toLowerCase().includes("backward")) {
+      fetch("http://" + espIp + "/m/b", {
+        mode: 'no-cors'
+      }).then((response) => {
         if (response.status === 200) {
           console.log("success");
           setStatus("Moving Backward");
@@ -139,8 +145,10 @@ function App() {
         console.log("network error: " + error);
       });
     }
-    else if(command.toLowerCase().includes("left") ){
-      fetch("http://"+espIp+"/t/l").then((response) => {
+    else if (command.toLowerCase().includes("left")) {
+      fetch("http://" + espIp + "/t/l", {
+        mode: 'no-cors'
+      }).then((response) => {
         if (response.status === 200) {
           console.log("success");
           setStatus("Turning Left");
@@ -151,8 +159,10 @@ function App() {
         console.log("network error: " + error);
       });
     }
-    else if(command.toLowerCase().includes("right") ){
-      fetch("http://"+espIp+"/t/r").then((response) => {
+    else if (command.toLowerCase().includes("right")) {
+      fetch("http://" + espIp + "/t/r", {
+        mode: 'no-cors'
+      }).then((response) => {
         if (response.status === 200) {
           console.log("success");
           setStatus("Turning Right");
@@ -163,8 +173,10 @@ function App() {
         console.log("network error: " + error);
       });
     }
-    else if(command.toLowerCase().includes("stop") ){
-      fetch("http://"+espIp+"/stop").then((response) => {
+    else if (command.toLowerCase().includes("stop")) {
+      fetch("http://" + espIp + "/stop", {
+        mode: 'no-cors'
+      }).then((response) => {
         if (response.status === 200) {
           console.log("success");
           setStatus("Stopped");
@@ -175,8 +187,10 @@ function App() {
         console.log("network error: " + error);
       });
     }
-    else if(command.toLowerCase().includes("speed")&& command.toLowerCase().includes("up") ){
-      fetch("http://"+espIp+"/s/u").then((response) => {
+    else if (command.toLowerCase().includes("speed") && command.toLowerCase().includes("up")) {
+      fetch("http://" + espIp + "/s/u", {
+        mode: 'no-cors'
+      }).then((response) => {
         if (response.status === 200) {
           console.log("success");
           setStatus("Speeding up");
@@ -187,8 +201,10 @@ function App() {
         console.log("network error: " + error);
       });
     }
-    else if(command.toLowerCase().includes("slow")&& command.toLowerCase().includes("down") ){
-      fetch("http://"+espIp+"/s/l").then((response) => {
+    else if (command.toLowerCase().includes("slow") && command.toLowerCase().includes("down")) {
+      fetch("http://" + espIp + "/s/l", {
+        mode: 'no-cors'
+      }).then((response) => {
         if (response.status === 200) {
           console.log("success");
           setStatus("Slowing Down");
@@ -200,11 +216,11 @@ function App() {
       });
 
     }
-    else{
+    else {
 
       setStatus("Invalid Command");
     }
-  },[command,isConnected]);
+  }, [command, isConnected]);
 
 
   const parseTime = (num) => {
@@ -256,14 +272,14 @@ function App() {
           {!isConnected ? (
             <div className="flex flex-row gap-2 justify-center items-center">
 
-              <input type="text" className="w-4/12 h-fit border-black border rounded-md"  value={espIp} onChange={(e)=>{console.log(e.target.value);setEspIp(e.target.value);} } placeholder="IP from ESP" id="inputBtn"/>
+              <input type="text" className="w-4/12 h-fit border-black border rounded-md" value={espIp} onChange={(e) => { console.log(e.target.value); setEspIp(e.target.value); }} placeholder="IP from ESP" id="inputBtn" />
 
-            <button
-              className="border border-black  bg-emerald-600  text-white mt-4 mb-4  rounded-md"
-              onClick={isConnectedToEsp32}
-            >
-              Connect to ESP32
-            </button>
+              <button
+                className="border border-black  bg-emerald-600  text-white mt-4 mb-4  rounded-md"
+                onClick={isConnectedToEsp32}
+              >
+                Connect to ESP32
+              </button>
             </div>
           ) : null}
           <div className=" mt-10 flex flex-col items-center">
