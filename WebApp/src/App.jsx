@@ -33,7 +33,9 @@ function App() {
   } = useAudioRecorder();
 
   const [status, setStatus] = useState("At Rest");
-  const[espIp, setEspIp] = useState("192.168.1.98");
+
+  const[espIp, setEspIp] = useState("");
+
   const [isConnected, setIsConnected] = useState(false);
   const [command, setCommand] = useState("stop");
 
@@ -62,7 +64,7 @@ function App() {
   const isConnectedToEsp32 = async () => {
     //ping esp32
     //if response is received setIsConnected(true)
-    fetch("http://192.168.1.97/")
+    fetch("http://"+espIp+"/")
       .then((response) => {
         if (response.status === 200) {
           console.log("success");
@@ -196,7 +198,10 @@ function App() {
       }).catch((error) => {
         console.log("network error: " + error);
       });
-    }else{
+
+    }
+    else{
+
       setStatus("Invalid Command");
     }
   },[command,isConnected]);
@@ -217,13 +222,13 @@ function App() {
   };
   return (
     <>
-      {/* <AudioRecorder 
+      {/* <AudioRecorder
     onRecordingComplete={addAudioElement}
     audioTrackConstraints={{
       noiseSuppression: true,
       echoCancellation: true,
-    }} 
-    downloadOnSavePress={false} 
+    }}
+    downloadOnSavePress={false}
     downloadFileExtension="webm"/> */}
       <div className="container h-screen w-screen m-auto overflow-hidden p-0">
         <div className=" flex flex-col h-full   pt-3 justify-end gap-10  shrink-0 items-center">
@@ -250,7 +255,9 @@ function App() {
           </div>
           {!isConnected ? (
             <div className="flex flex-row gap-2 justify-center items-center">
-              <input type="text" className="w-4/12 h-fit border-black border rounded-md"  value={espIp} onChange={(e)=>{setEspIp(e.target.value)}} placeholder="IP from ESP"/>
+
+              <input type="text" className="w-4/12 h-fit border-black border rounded-md"  value={espIp} onChange={(e)=>{console.log(e.target.value);setEspIp(e.target.value);} } placeholder="IP from ESP" id="inputBtn"/>
+
             <button
               className="border border-black  bg-emerald-600  text-white mt-4 mb-4  rounded-md"
               onClick={isConnectedToEsp32}
@@ -258,7 +265,6 @@ function App() {
               Connect to ESP32
             </button>
             </div>
-            
           ) : null}
           <div className=" mt-10 flex flex-col items-center">
             <div className="flex flex-row mb-2 transition">

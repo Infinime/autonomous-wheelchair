@@ -1,11 +1,22 @@
 // Load Wi-Fi library
 #include <WiFi.h>
+
 #include <WebServer.h>
+
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+// initiate battery reading pin
+#define battPin D1
+
 
 // Replace with your network credentials
 const char* ssid = "Quincy";
 const char* password = "etesians";
 
+// current screen turanci
+char* currentScreen = "";
 // Set web server port number to 80
 WebServer server(80);
 String SendHTML(){
@@ -32,42 +43,76 @@ String SendHTML(){
   return ptr;
 }
 
+
+void updateScreen(char* message = "Ready") {
+  if (message != currentScreen) {
+    lcd.clear();
+    int voltReading = analogRead(battPin);
+    int volts = map(voltReading, 676, 1023, 0, 100);
+    lcd.setCursor(0, 0);
+    lcd.print("Battery:");
+    if (volts == 100) {
+      lcd.setCursor(12, 0);
+
+      lcd.print(volts);
+      lcd.print("%");
+    } else if (volts < 10) {
+      lcd.setCursor(14, 0);
+      lcd.print(volts);
+      lcd.print("%");
+    } else {
+      lcd.setCursor(13, 0);
+      lcd.print(volts);
+      lcd.print("%");
+    }
+    lcd.setCursor(0, 1);
+    lcd.print(message);
+    currentScreen = message;
+  }
+}
+
 void handle_OnConnect() {
   Serial.println("HomePage");
-  server.send(200, "text/html", SendHTML()); 
+
+  updateScreen("Ready");
+  // server.send(200, "text/html", SendHTML()); 
 }
 void moveForward(){
   Serial.println("Moving Forward");
-  server.send(200, "text/html", SendHTML()); 
+  updateScreen("Forwards");
+  // server.send(200, "text/html", SendHTML()); 
 }
 void moveBackward(){
   Serial.println("Moving Backward");
-  server.send(200, "text/html", SendHTML()); 
+  updateScreen("Reverse");
+  // server.send(200, "text/html", SendHTML()); 
 }
 void turnLeft(){
   Serial.println("Turning Left");
-  server.send(200, "text/html", SendHTML()); 
+  updateScreen("Left");
+  // server.send(200, "text/html", SendHTML()); 
 }
 void turnRight(){
   Serial.println("Turning Right");
-  server.send(200, "text/html", SendHTML()); 
+  updateScreen("Right");
+  // server.send(200, "text/html", SendHTML()); 
+
 }
 void stop(){
   Serial.println("Stopping");
-  server.send(200, "text/html", SendHTML()); 
+
+  updateScreen("Ready");
+  // server.send(200, "text/html", SendHTML()); 
 }
 void speedUp(){
   Serial.println("Speeding Up");
-  server.send(200, "text/html", SendHTML()); 
+  updateScreen("Speed Up");
+  // server.send(200, "text/html", SendHTML()); 
 }
 void slowDown(){
   Serial.println("Slowing Down");
-  server.send(200, "text/html", SendHTML()); 
-}
-
-
-void handle_NotFound(){
-  server.send(404, "text/plain", "Not found");
+  updateScreen("Slow Down");
+  // server.send(200, "text/html", SendHTML()); 
 }
 
 void setup() {
@@ -106,4 +151,12 @@ void setup() {
 
 void loop(){
   server.handleClient();
+
+  
+  // initialize LCD
+  lcd.begin(16, 2);
+  lcd.noBlink();
+  pinMode(battPin, INPUT);
+}
+
 }

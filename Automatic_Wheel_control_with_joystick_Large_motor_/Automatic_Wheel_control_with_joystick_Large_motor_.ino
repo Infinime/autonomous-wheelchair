@@ -1,226 +1,201 @@
 /* code for automatic wheel chair using irf3205 motor driver with 24V power supply
    using joystick control for mechatronics system design 2, department of mechatronics engr
-   Federal University of Technology, Minna 
+   Federal University of Technology, Minna
+   Course facilitated by Engr. Adeyinka A.
  */
 
+// initiate right wheel control pin
+int pwm1 = 3;  // PWM pin
+int dir1 = 2;
 
+// initiate left wheel control pin
+int pwm2 = 5;  // PWM pin
+int dir2 = 4;
 
-//initiate right wheel control pin
-int pwm1=3; //PWM pin
-int dir1=2;
-
-//initiate left wheel control pin
-int pwm2=5; //PWM pin
-int dir2=4;
-
-//initiate joystic control pin
+// initiate joystick control pin
 #define joystickVert A0
 #define joystickHort A1
 
-//initialte position
-int joystickPosVert=437;
-int joystickPosHor=343;
+#define RXp2 0
+#define TXp2 1
 
-//initiate motor speed
-int motorSpeed1=0;
-int motorSpeed2=0;
+// initiate position
+int joyY = 512;
+int joyX = 512;
 
-//initiate ultrasonic sensor
-int triggerPin=8;
-int echoPin=9;
+float speedRatio;
+float speed;
+
+// initiate vJoystick
+int vjoyY = 512;
+int vjoyX = 512;
+
+// initiate motor speed
+int rightMotorSpeed = 0;
+int leftMotorSpeed = 0;
+
+bool voiceControlAllowed = 0;
+bool ignoreVoice = 0;
+
+// initiate ultrasonic sensor
+int triggerPin = 8;
+int echoPin = 9;
 float duration, distance;
 
-//initiate buzzer;
-int buzzerPin=10;
-
-//initiate LEDs
-int LEDgreen=6;
-int LEDred=7;
-int LEDyellow1=11;
-int LEDyellow2=12;
+// initiate buzzer;
+int buzzerPin = 10;
 
 void setup() {
-  // put your setup code here, to run once:
-pinMode(pwm1, OUTPUT);
-pinMode(dir1, OUTPUT);
-pinMode(dir2, OUTPUT);
-pinMode(pwm2, OUTPUT);
-pinMode(LEDgreen, OUTPUT);
-pinMode(LEDred, OUTPUT);
-pinMode(LEDyellow1, OUTPUT);
-pinMode(LEDyellow2, OUTPUT);
-pinMode(triggerPin, OUTPUT);
-pinMode(echoPin, INPUT);
-pinMode(buzzerPin, OUTPUT);
-pinMode(joystickVert, INPUT);
-pinMode(joystickHort, INPUT);
+  pinMode(pwm1, OUTPUT);
+  pinMode(dir1, OUTPUT);
+  pinMode(dir2, OUTPUT);
+  pinMode(pwm2, OUTPUT);
+  pinMode(triggerPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(joystickVert, INPUT);
+  pinMode(joystickHort, INPUT);
 
-//initially set to forward mode with no motion
-digitalWrite(pwm1, 0);
-digitalWrite(dir1, 1);
-digitalWrite(dir2, 1);
-digitalWrite(pwm2, 0);
+  // initially set to forward mode with no motion
+  digitalWrite(pwm1, 0);
+  digitalWrite(dir1, 1);
+  digitalWrite(dir2, 1);
+  digitalWrite(pwm2, 0);
 
-Serial.begin(9600);
+  Serial.begin(115200, SERIAL_8N1);
+}
+// ---------------- Helper functions to control wheelchair ---------------------
+void stopMotion() {
+  rightMotorSpeed = 0;
+  leftMotorSpeed = 0;
+  Serial.print("Stop moving");
+}
+
+void setSpeed(float speed, float speedRatio) {
+  if (speed > 0) {
+    //  forward motion
+
+    // set right wheel to move forward
+    digitalWrite(dir1, 1);
+    // set left wheel to move forward
+    digitalWrite(dir2, 1);
+    rightMotorSpeed = speedRatio * speed;
+    leftMotorSpeed = (1 - speedRatio) * speed;
+  } else {
+    //  backward motion
+
+    // set right wheel to move forward
+    digitalWrite(dir1, 0);
+    // set left wheel to move forward
+    digitalWrite(dir2, 0);
+    rightMotorSpeed = -speedRatio * speed;
+    leftMotorSpeed = -(1 - speedRatio) * speed;
+
+    // code for obstacle detection
+
+    digitalWrite(triggerPin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(triggerPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(triggerPin, LOW);
+
+    // Measure the response from the HC-SR04 Echo pin
+    duration = pulseIn(echoPin, HIGH);
+
+    // determine distance for duration
+    // use 0.0343cm/s as speed of sound in air
+
+    distance = (duration / 2) * 0.0343;
+
+    // send results to serial monitor
+    Serial.print("Distance =: ");
+    if (distance >= 400 || distance <= 2) {
+      Serial.println("Out of range");
+    } else {
+      Serial.print(distance);
+      Serial.println(" cm");
+    }
+    if (distance <= 40) {
+      tone(buzzerPin, 300);
+      delay(400);
+      noTone(buzzerPin);
+      delay(400);
+    }
+  }
+}
+
+
+String last_esp_command = "";
+int last_command_time_ms = 0;
+void voiceControl(String esp_command) {
+  if (esp_command.indexOf("Moving Forward") >= 0) {
+    setSpeed(100, 0.5);
+  }
+  if (esp_command.indexOf("Moving Backward") >= 0) {
+    setSpeed(-100, 0.5);
+  }
+  if (esp_command.indexOf("Turning Left") >= 0) {
+    setSpeed(100, 0.75);
+  }
+  if (esp_command.indexOf("Turning Right") >= 0) {
+    setSpeed(100, 0.25);
+  }
+  if (esp_command.indexOf("Stopping") >= 0) {
+    stopMotion();
+  }
+  if (esp_command.indexOf("Speeding Up") >= 0) {
+    leftMotorSpeed += 50;
+    rightMotorSpeed += 50;
+  }
+  if (esp_command.indexOf("Slowing Down") >= 0) {
+    leftMotorSpeed -= 50;
+    rightMotorSpeed -= 50;
+  }
 }
 
 void loop() {
+  String esp_command = Serial.readString();
+  Serial.print(esp_command);
+
   // put your main code here, to run repeatedly:
-joystickPosVert = analogRead(joystickVert);
-joystickPosHor = analogRead(joystickHort);
+  joyY = analogRead(joystickVert);
+  joyX = analogRead(joystickHort);
 
-if(joystickPosVert < 237){    //giving it some clearance of 52(about 10%)
-  // This is backward motion
-  Serial.println("vert reverse: ");
-  Serial.println(joystickPosVert);
-  //delay(1000);
-  //set right wheel to move backward
-  digitalWrite(dir1, 0);
-  //set left wheel to move backward
-  digitalWrite(dir2, 0);  
-  //turn on red LED
-  digitalWrite(LEDred, HIGH);
-  digitalWrite(LEDgreen, LOW);
-  digitalWrite(LEDyellow1, LOW);
-  digitalWrite(LEDyellow2, LOW);
-  
-  joystickPosVert = joystickPosVert - 237;
-  joystickPosVert = joystickPosVert * -1;
-  
-  motorSpeed1 = map(joystickPosVert, 0, 237, 0, 200);
-  motorSpeed2 = map(joystickPosVert, 0, 237, 0, 200); 
-  Serial.println("Yay!!! i am reversing");
-  //delay(50);
-  //code for obstacle detection
-
-  digitalWrite(triggerPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(triggerPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(triggerPin, LOW);
-
-  //Measure the response from the HC-SR04 Echo pin
-  duration = pulseIn(echoPin, HIGH);
-
-  //determine distance for duration
-  //use 0.0343cm/s as speed of sound in air
- 
-  distance = (duration/2) * 0.0343; 
-
-  //send results to serial monitor
-  Serial.print("Distance =: ");
-  if(distance >=400 || distance <=2){
-    Serial.println("Out of range");
-  } else{
-    Serial.print(distance);
-    Serial.println(" cm");
+  if (joyX >= 462 && joyX <= 562 && joyY >= 462 && joyY <= 562) {
+    // DMZ where no input is taken and the program can listen to the voice
+    // If not voice control, stop motion
+    if (not voiceControlAllowed) {
+      stopMotion();
+      voiceControlAllowed = 1;
+    }
+    // voice shit can happen now
+    else {
+      if (last_esp_command != esp_command) {
+        last_command_time_ms = millis();
+        voiceControl(esp_command);
+        last_esp_command = esp_command;
+      }
+      else if ((last_command_time_ms+60000)>millis()>0){
+        stopMotion();
+      }
+    }
   }
-  if(distance  <= 40){
-    Serial.println("Beware, obstacle ahead!!!");
-    tone(buzzerPin, 300);
-    delay(400);
-    noTone(buzzerPin);
-    delay(400);
-   }
+
+  else {
+    // manual control
+    voiceControlAllowed = 0;
+    speed = map(joyY, 0, 1024, -200, 200);
+    speedRatio = joyX / 1024;
+    setSpeed(speed, speedRatio);
   }
-else if(joystickPosVert > 537){
-  //This is forward motion
-  //set right wheel to move forward
-  digitalWrite(dir1, 1);
-  //set left wheel to move backward
-  digitalWrite(dir2, 1);
 
-  //turn on green LED
-  digitalWrite(LEDred, LOW);
-  digitalWrite(LEDgreen, HIGH);
-  digitalWrite(LEDyellow1, LOW);
-  digitalWrite(LEDyellow2, LOW);
+  // Adjust to prevent buzzling at very low speed
+  if (rightMotorSpeed < 8)
+    rightMotorSpeed = 0;
+  if (leftMotorSpeed < 8)
+    leftMotorSpeed = 0;
 
-  motorSpeed1 = map(joystickPosVert, 537, 1023, 0, 100);
-  motorSpeed2 = map(joystickPosVert, 537, 1023, 0, 100); 
-  Serial.println("Yay!!! i am moving forward"); 
-  Serial.println(joystickPosVert);  
-  //delay(50);
-  }
- else{ 
-//  digitalWrite(dir1,X);
-//  digitalWrite(dir2,X);
-  motorSpeed1--; // @remind @test
-  motorSpeed2--; // @remind @test
-  motorSpeed1 = max(motorSpeed1, 0);
-  motorSpeed2 = max(motorSpeed2, 0);
-   digitalWrite(LEDred, LOW);
-   digitalWrite(LEDgreen, LOW);
-   digitalWrite(LEDyellow1, LOW);
-   digitalWrite(LEDyellow2, LOW);
-   //delay(50);
-  // the wheels wont move between 460-563
-  Serial.print(" I stop moving");
-  } 
-
- //setting up the left and right movement
-
-if(joystickPosHor < 237){
-  Serial.println(joystickPosHor);
-   // This is left motion
-   // take reverse readings  
-  joystickPosHor = joystickPosHor - 237;
-  joystickPosHor = joystickPosHor * -1;
-
-  joystickPosHor = map(joystickPosHor, 0, 237, 0, 100);
-
-   motorSpeed1 =  motorSpeed1 - joystickPosHor;
-   motorSpeed2 =  motorSpeed2 + joystickPosHor;
-
-   //turn on yellow1 (left yellow) LED
-   digitalWrite(LEDred, LOW);
-   digitalWrite(LEDgreen, LOW);
-   digitalWrite(LEDyellow1, HIGH);
-   digitalWrite(LEDyellow2, LOW);
-   
-
-   //Don't exceed range of 0-255 for motor speeds 
-
-   motorSpeed1 = max(motorSpeed1, 0);
-   motorSpeed2 = min(motorSpeed2, 100);
-
-   Serial.print("Yay!!! i'm moving to the left");
-   //delay(50);
- }
-else if(joystickPosHor > 660){
-   // This is right motion
-   Serial.println(joystickPosHor);
-   joystickPosHor = map(joystickPosHor, 660, 1023, 0, 95);
-
-   motorSpeed1 =  motorSpeed1 + joystickPosHor;
-   motorSpeed2 =  motorSpeed2 - joystickPosHor;
-
-   //Don't exceed range of 0-255 for motor speeds 
-   
-   motorSpeed1 = min(motorSpeed1, 100);
-
-    motorSpeed2 = max(motorSpeed2, 0);
-   //turn on yellow2 (left yellow) LED
-   digitalWrite(LEDred, LOW);
-   digitalWrite(LEDgreen, LOW);
-   digitalWrite(LEDyellow1, LOW);
-   digitalWrite(LEDyellow2, HIGH);
-   //delay(50);
-}
-
- if(joystickPosHor >= 237 && joystickPosHor <= 660 && joystickPosVert >= 237 && joystickPosVert <= 537){
-   motorSpeed1--;// @remind
-   motorSpeed2--;// @remind
-   motorSpeed1 = max(motorSpeed1, 0);
-   motorSpeed2 = max(motorSpeed2, 0);
-}
-
-    //Adjust to prevent buzzling at very low speed
-if(motorSpeed1 < 8) motorSpeed1 = 0;
-if(motorSpeed2 < 8) motorSpeed2 = 0;
-
-   //set the motor speeds
-analogWrite(pwm1, motorSpeed1);
-analogWrite(pwm2, motorSpeed2);
-
+  // set the motor speeds
+  analogWrite(pwm1, rightMotorSpeed);
+  analogWrite(pwm2, leftMotorSpeed);
 }
