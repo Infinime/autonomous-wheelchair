@@ -1,10 +1,18 @@
 // Load Wi-Fi library
 #include <WiFi.h>
+#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+// initiate battery reading pin
+#define battPin D1
 
 // Replace with your network credentials
 const char* ssid = "Quincy";
 const char* password = "etesians";
 
+// current screen turanci
+char* currentScreen = "";
 // Set web server port number to 80
 WiFiServer server(80);
 
@@ -18,37 +26,73 @@ unsigned long previousTime = 0;
 // Define timeout time in milliseconds (example: 2000ms = 2s)
 const long timeoutTime = 2000;
 
+
+void updateScreen(char* message = "Ready") {
+  if (message != currentScreen) {
+    lcd.clear();
+    int voltReading = analogRead(battPin);
+    int volts = map(voltReading, 676, 1023, 0, 100);
+    lcd.setCursor(0, 0);
+    lcd.print("Battery:");
+    if (volts == 100) {
+      lcd.setCursor(12, 0);
+
+      lcd.print(volts);
+      lcd.print("%");
+    } else if (volts < 10) {
+      lcd.setCursor(14, 0);
+      lcd.print(volts);
+      lcd.print("%");
+    } else {
+      lcd.setCursor(13, 0);
+      lcd.print(volts);
+      lcd.print("%");
+    }
+    lcd.setCursor(0, 1);
+    lcd.print(message);
+    currentScreen = message;
+  }
+}
+
 void handle_OnConnect() {
   // Serial.println(server.client().localIP());
   Serial.println("HomePage");
+  updateScreen("Ready");
   // server.send(200, "text/html", SendHTML()); 
 }
 void moveForward(){
   Serial.println("Moving Forward");
+  updateScreen("Forwards");
   // server.send(200, "text/html", SendHTML()); 
 }
 void moveBackward(){
   Serial.println("Moving Backward");
+  updateScreen("Reverse");
   // server.send(200, "text/html", SendHTML()); 
 }
 void turnLeft(){
   Serial.println("Turning Left");
+  updateScreen("Left");
   // server.send(200, "text/html", SendHTML()); 
 }
 void turnRight(){
   Serial.println("Turning Right");
+  updateScreen("Right");
   // server.send(200, "text/html", SendHTML()); 
 }
 void stopWheel(){
   Serial.println("Stopping");
+  updateScreen("Ready");
   // server.send(200, "text/html", SendHTML()); 
 }
 void speedUp(){
   Serial.println("Speeding Up");
+  updateScreen("Speed Up");
   // server.send(200, "text/html", SendHTML()); 
 }
 void slowDown(){
   Serial.println("Slowing Down");
+  updateScreen("Slow Down");
   // server.send(200, "text/html", SendHTML()); 
 }
 
@@ -69,6 +113,11 @@ void setup() {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
   server.begin();
+  
+  // initialize LCD
+  lcd.begin(16, 2);
+  lcd.noBlink();
+  pinMode(battPin, INPUT);
 }
 
 void loop(){
@@ -120,8 +169,7 @@ void loop(){
             } 
             if (header.indexOf("GET /s/d") >= 0) {
               slowDown();
-            } 
-
+            }
             
             // Display the HTML web page
             client.println("<!DOCTYPE html><html>");

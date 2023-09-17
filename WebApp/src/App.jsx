@@ -196,7 +196,8 @@ function App() {
       }).catch((error) => {
         console.log("network error: " + error);
       });
-    }else{
+    }
+    else{
       setStatus("Invalid Command");
     }
   },[command,isConnected]);
